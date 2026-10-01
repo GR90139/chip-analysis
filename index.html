@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>籌碼表</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="page">
+        <!-- 日期篩選控制面板 -->
+        <div class="controls">
+            <div class="date-inputs">
+                <label for="startDate">起始日期:</label>
+                <input type="date" id="startDate" />
+
+                <label for="endDate">結束日期:</label>
+                <input type="date" id="endDate" />
+
+                <button class="filter-btn" onclick="applyDateFilter()">套用篩選</button>
+
+                <div class="quick-filters">
+                    <button class="quick-filter-btn" onclick="setQuickFilter(10)">最近10日</button>
+                    <button class="quick-filter-btn" onclick="setQuickFilter(20)">最近20日</button>
+                    <button class="quick-filter-btn" onclick="setQuickFilter(60)">最近60日</button>
+                    <button class="quick-filter-btn" onclick="setQuickFilter(0)">全部</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 圖表區 -->
+        <div id="chartsGrid">
+            <div class="chart-panel">
+                <div class="chart-container">
+                    <canvas id="foreignChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-panel">
+                <div class="chart-container">
+                    <canvas id="marginChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-panel">
+                <div class="chart-container">
+                    <canvas id="futuresChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-panel">
+                <div class="chart-container">
+                    <canvas id="optionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let filteredData = [];
+        let charts = {
+            foreign: null,
+            margin: null,
+            futures: null,
+            options: null
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const API_KEY = params.get("key");
+        const SPREADSHEET_ID = "1uPOoATry3Lp6Wh4_Ektc0Oyr6s24XX8QYcTEXT61Gis";
+        const RANGE = "大盤分析表!A:AA";
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+
+        fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.values && data.values.length > 0) {
+                    processDataAndCreateCharts(data.values);
+                } else {
+                    alert("Google Sheets 沒有資料");
+                }
+            })
+            .catch((error) => {
+                console.error("錯誤:", error);
+                alert("無法載入資料，請檢查網路連線或 API 金鑰");
+            });
+    </script>
+    <script src="./app.js"></script>
+</body>
+</html>
